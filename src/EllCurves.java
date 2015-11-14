@@ -1,6 +1,5 @@
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.function.BiFunction;
 
 /**
  * Created by admin on 13.11.2015.
@@ -38,7 +37,7 @@ public class EllCurves {
 
     private BigInteger mods(BigInteger a, BigInteger n){
         if (n.compareTo(ZERO) <= 0){
-            System.err.println("Îòðèöàòåëüíûé ìîäóëü");
+            System.err.println("ÐžÑ‚Ñ€Ð¸Ñ†Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ Ð¼Ð¾Ð´ÑƒÐ»ÑŒ");
             System.exit(-1);
         }
         a = a.mod(n);
@@ -62,7 +61,7 @@ public class EllCurves {
 
     private BigInteger quos(BigInteger a, BigInteger n) {
         if (n.compareTo(ZERO) <= 0) {
-            System.err.println("Îòðèöàòåëüíûé ìîäóëü");
+            System.err.println("ÐžÑ‚Ñ€Ð¸Ñ†Ð°Ñ‚ÐµÐ»ÑŒÐ½Ñ‹Ð¹ Ð¼Ð¾Ð´ÑƒÐ»ÑŒ");
         }
         return (a.subtract(mods(a, n))).divide(n);
     }
@@ -74,11 +73,11 @@ public class EllCurves {
         BigInteger z1 = z.f1();
         BigInteger n1 = (z0.multiply(z0).add(z1.multiply(z1)));
         if (n1.equals(ZERO)) {
-            System.err.println("Äåëåíèå íà 0");
+            System.err.println("Ð”ÐµÐ»ÐµÐ½Ð¸Ðµ Ð½Ð° 0");
             System.exit(-1);
         }
         BigInteger u0 = quos(w0.multiply(z0).add(w1.multiply(z1)), n1);
-        BigInteger u1 = quos(w1.multiply(z0).add(w0.multiply(z1)), n1);
+        BigInteger u1 = quos(w1.multiply(z0).subtract(w0.multiply(z1)), n1);
         return new Pair(w0.subtract(z0.multiply(u0)).add((z1).multiply(u1)),
                 w1.subtract((z0).multiply(u1)).subtract((z1).multiply(u0)));
     }
@@ -99,7 +98,7 @@ public class EllCurves {
             System.exit(-1);
         }
         if (!p.mod(FOUR).equals(ONE)) {
-            System.err.println("Íå êîíãðóýíòíî");
+            System.err.println("ÐÐµ ÐºÐ¾Ð½Ð³Ñ€ÑƒÑÐ½Ñ‚Ð½Ð¾");
             System.exit(-1);
         }
         BigInteger k = p.divide(FOUR);
@@ -110,7 +109,7 @@ public class EllCurves {
             if (b.equals(mONE))
                 return a;
             if (!b.equals(ONE)) {
-                System.err.println("Íå ïðîñòîå");
+                System.err.println("ÐÐµ Ð¿Ñ€Ð¾ÑÑ‚Ð¾Ðµ");
                 System.exit(-1);
             }
             j = j.add(ONE);
@@ -124,7 +123,7 @@ public class EllCurves {
 
     public static void main(String[] args) {
         EllCurves m = new EllCurves(160);
-        BigInteger p = new BigInteger(String.valueOf(29));
+        BigInteger p = new BigInteger(String.valueOf(30));
         Pair res = m.sq2p(p);
         System.out.println(res.f0() + " " + res.f1());
     }
