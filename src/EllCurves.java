@@ -6,19 +6,26 @@ import java.security.SecureRandom;
  */
 public class EllCurves {
 
+    private BigInteger p;
     private BigInteger ZERO = BigInteger.ZERO;
     private BigInteger ONE = BigInteger.ONE;
     private BigInteger TWO = new BigInteger(String.valueOf(2));
     private BigInteger THREE = new BigInteger(String.valueOf(3));
     private BigInteger FOUR = new BigInteger(String.valueOf(4));
     private BigInteger mONE = new BigInteger(String.valueOf(-1));
+    public BigInteger std1 = new BigInteger(String.valueOf(48151));
+    public BigInteger std2 = new BigInteger(String.valueOf(62342));
     private SecureRandom rand;
     int n;
+
+    public BigInteger getP() {
+        return p;
+    }
 
     public EllCurves(int n) {
         this.n = n;
         this.rand = new SecureRandom();
-        BigInteger p = randomNumber(true, n);
+        p = randomNumber(true, n);
         while (!p.mod(FOUR).equals(ONE))
             p = randomNumber(true, n);
     }
@@ -60,9 +67,13 @@ public class EllCurves {
         return number;
     }
 
-    public BigInteger generateMod4(boolean prime, int size) {
+    public void setP(BigInteger p) {
+        this.p = p;
+    }
+
+    public BigInteger regenerateP(boolean prime, int size) {
         BigInteger res = randomNumber(prime, size);
-        while (!res.mod(FOUR).equals(ZERO))
+        while (!res.mod(FOUR).equals(ONE))
             res = randomNumber(prime, size);
         return res;
     }
@@ -85,7 +96,8 @@ public class EllCurves {
                 r = r.subtract(ONE);
                 res = mods(res.multiply(a), n);
             }
-            r = r.divide(TWO);
+//            r = r.divide(TWO);
+            r = div(r, TWO);
             a = mods(a.multiply(a), n);
         }
         return res;
@@ -95,7 +107,8 @@ public class EllCurves {
         if (n.compareTo(ZERO) <= 0) {
             System.err.println("Отрицательный модуль");
         }
-        return (a.subtract(mods(a, n))).divide(n);
+//        return (a.subtract(mods(a, n))).divide(n);
+        return div(a.subtract(mods(a, n)), n);
     }
 
     private Pair grem(Pair w, Pair z) {
@@ -133,7 +146,8 @@ public class EllCurves {
             System.err.println("Не конгруэнтно");
             System.exit(-1);
         }
-        BigInteger k = p.divide(FOUR);
+//        BigInteger k = p.divide(FOUR);
+        BigInteger k = div(p, FOUR);
         BigInteger j = TWO;
         while (true) {
             a = powMods(j, k, p);
@@ -160,14 +174,14 @@ public class EllCurves {
         BigInteger y2 = B.f1();
         BigInteger x3,y3;
         BigInteger lam;
-        if (A.equals(new Pair(null, null))){
+        if (A.equals(new Pair(std1, std2))){
             return B;
         }
-        if (B.equals(new Pair(null, null)))
+        if (B.equals(new Pair(std1, std2)))
             return A;
         if (A.equals(B)){
             if (y1.equals(ZERO))
-                return new Pair(null, null);
+                return new Pair(std1, std2);
             lam = (x1.multiply(x1).multiply(THREE).add(a)).
                     multiply(gcdExtended(y1.multiply(TWO), p)[1]).mod(p);
             x3 = (lam.multiply(lam).subtract(x1.multiply(TWO))).mod(p);
@@ -175,7 +189,7 @@ public class EllCurves {
             return new Pair(x3, y3);
         } else {
             if (x1.equals(x2))
-                return new Pair(null, null);
+                return new Pair(std1, std2);
             lam = ((y2.subtract(y1)).
                     multiply(gcdExtended(x2.subtract(x1), p)[1])).mod(p);
             x3 = (lam.multiply(lam).subtract(x2).subtract(x1)).mod(p);
@@ -187,9 +201,9 @@ public class EllCurves {
     public BigInteger[] mult (BigInteger k, Pair X, BigInteger a, BigInteger p){
         Pair s = X;
         BigInteger i = ZERO;
-        for (i = ZERO; i.compareTo(k) <= 0; i = i.add(ONE)) {
+        for (i = ZERO; i.compareTo(k) < 0; i = i.add(ONE)) {
             s = add(s, X, a, p);
-            if (s.equals(new Pair(null, null))){
+            if (s.equals(new Pair(std1, std2))){
                 System.out.println("ee =" + k + "\n i = " + i);
                 return new BigInteger[]{s.f0(), s.f1(), i};
             }
@@ -199,24 +213,39 @@ public class EllCurves {
     
     public Pair check(BigInteger a, BigInteger p, BigInteger d, BigInteger e) {
         BigInteger e1, e2;
-        BigInteger x = p.subtract(a).modPow(p.subtract(ONE).divide(TWO), p);
+//        BigInteger x = p.subtract(a).modPow(p.subtract(ONE).divide(TWO), p);
+        BigInteger x = (p.subtract(a).modPow(div(p.subtract(ONE), TWO), p));
         if (x.equals(ONE)) {
             e1 = p.add(ONE).add(TWO.multiply(d));
             e2 = p.add(ONE).subtract(TWO.multiply(d));
             if (e1.mod(FOUR).equals(ZERO))
-                return new Pair(e1, e1.divide(FOUR));
+                return new Pair(e1, div(e1, FOUR));
+//                return new Pair(e1, e1.divide(FOUR));
             if (e2.mod(FOUR).equals(ZERO))
-                return new Pair(e2, e2.divide(FOUR));
+//                return new Pair(e2, e2.divide(FOUR));
+                return new Pair(e2, div(e2, FOUR));
         }
         if (x.equals(p.subtract(ONE))) {
             e1 = p.add(ONE).add(TWO.multiply(e));
             e2 = p.add(ONE).subtract(TWO.multiply(e));
-            if (e1.divide(TWO).isProbablePrime(15))
+//            if (e1.divide(TWO).isProbablePrime(15))
+            if (div(e1, TWO).isProbablePrime(15))
                 return new Pair(e1, e1.divide(TWO));
-            if (e2.divide(TWO).isProbablePrime(15))
+            if (div(e2, TWO).isProbablePrime(25))
+//            if (e2.divide(TWO).isProbablePrime(15))
                 return new Pair(e2, e2.divide(TWO));
         }
-        return new Pair(null, null);
+        return new Pair(std1, std2);
+    }
+
+
+    public BigInteger div(BigInteger a, BigInteger b){
+        BigInteger c = a.divide(b);
+        if (c.equals(ZERO)){
+            if (a.compareTo(ZERO) < 0 || b.compareTo(ZERO) < 0)
+                c = ONE;
+        }
+        return c;
     }
 
     public static void main(String[] args) {
