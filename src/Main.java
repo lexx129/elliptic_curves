@@ -22,7 +22,7 @@ public class Main {
         BigInteger a;
         while (true) {
             p = l.getP();
-            p = BigInteger.valueOf(37409);
+//            p = BigInteger.valueOf(52321);
             System.out.println("Generated p = " + p);
             Pair pair = l.sq2p(p);
             e = pair.f0().abs();
@@ -53,10 +53,10 @@ public class Main {
         }
         while (true) {
 
-//            x0 = l.randomNumber(false, p.bitLength());
-//            y0 = l.randomNumber(false, p.bitLength());
-            x0 = BigInteger.valueOf(9417);
-            y0 = BigInteger.valueOf(7820);
+            x0 = l.randomNumber(false, p.bitLength());
+            y0 = l.randomNumber(false, p.bitLength());
+//            x0 = BigInteger.valueOf(15227);
+//            y0 = BigInteger.valueOf(4523);
             System.out.println("Generated point: (" + x0 + ", " + y0 + ")");
             BigInteger temp = l.gcdExtended(x0, p)[1];
             a = (((y0.multiply(y0)).subtract(x0.multiply(x0.multiply(x0)))).
@@ -84,9 +84,11 @@ public class Main {
         Pair S = G;
         OutputStreamWriter osr = new OutputStreamWriter(new FileOutputStream(".\\output_x.txt"));
         OutputStreamWriter osr1 = new OutputStreamWriter(new FileOutputStream(".\\output_y.txt"));
-        for (BigInteger i = ZERO; i.compareTo(m) <= 0; i = i.add(ONE)) {
+        for (BigInteger i = ZERO; i.compareTo(m) < 0; i = i.add(ONE)) {
             S = l.add(S, G, a, p);
+            if (!S.f0().equals(l.std1))
             osr.write(String.valueOf(S.f0()) + "\n");
+            if (!S.f1().equals(l.std2))
             osr1.write(String.valueOf(S.f1()) + "\n");
 //            System.out.println("x = " + S.f0() + "    y = " + S.f1());
         }

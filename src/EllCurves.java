@@ -13,8 +13,8 @@ public class EllCurves {
     private BigInteger THREE = new BigInteger(String.valueOf(3));
     private BigInteger FOUR = new BigInteger(String.valueOf(4));
     private BigInteger mONE = new BigInteger(String.valueOf(-1));
-    public BigInteger std1 = new BigInteger(String.valueOf(48151));
-    public BigInteger std2 = new BigInteger(String.valueOf(62342));
+    public BigInteger std1 = new BigInteger(String.valueOf(999999999));
+    public BigInteger std2 = new BigInteger(String.valueOf(888888888));
     private SecureRandom rand;
     int n;
 
@@ -30,7 +30,7 @@ public class EllCurves {
             p = randomNumber(true, n);
     }
 
-    public BigInteger[] gcdExtended(BigInteger a, BigInteger b){
+   /* public BigInteger[] gcdExtended(BigInteger a, BigInteger b){
         BigInteger x = ZERO;
         BigInteger lastX = ONE;
         BigInteger y = ONE;
@@ -53,6 +53,30 @@ public class EllCurves {
             lastY = temp;
         }
         return new BigInteger[]{a, lastX, lastY};
+    }*/
+
+    public BigInteger[] gcdExtended(BigInteger a, BigInteger b){
+        if (b.equals(ZERO))
+            return new BigInteger[]{a, ONE, ZERO};
+        BigInteger x1 = ZERO, y2 = ZERO;
+        BigInteger x2 = ONE, y1 = ONE;
+        BigInteger x = ZERO, y = ZERO, d = ZERO;
+        while (b.compareTo(ZERO) > 0){
+            BigInteger q = div(a, b);
+            BigInteger r = a.subtract(q.multiply(b));
+            x = x2.subtract(q.multiply(x1));
+            y = y2.subtract(q.multiply(y1));
+            a = b;
+            b = r;
+            x2 = x1;
+            x1 = x;
+            y2 = y1;
+            y1 = y;
+            d = a;
+            x = x2;
+            y = y2;
+        }
+        return new BigInteger[]{d, x, y};
     }
 
     public BigInteger randomNumber(boolean prime, int size) {
@@ -231,7 +255,7 @@ public class EllCurves {
 //            if (e1.divide(TWO).isProbablePrime(15))
             if (div(e1, TWO).isProbablePrime(15))
                 return new Pair(e1, e1.divide(TWO));
-            if (div(e2, TWO).isProbablePrime(25))
+            if (div(e2, TWO).isProbablePrime(15))
 //            if (e2.divide(TWO).isProbablePrime(15))
                 return new Pair(e2, e2.divide(TWO));
         }
@@ -243,7 +267,7 @@ public class EllCurves {
         BigInteger c = a.divide(b);
         if (c.equals(ZERO)){
             if (a.compareTo(ZERO) < 0 || b.compareTo(ZERO) < 0)
-                c = ONE;
+                c = mONE;
         }
         return c;
     }
