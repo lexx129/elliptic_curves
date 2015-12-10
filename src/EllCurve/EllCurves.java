@@ -1,3 +1,5 @@
+package EllCurve;
+
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -20,6 +22,9 @@ public class EllCurves {
 
     public BigInteger getP() {
         return p;
+    }
+
+    public EllCurves() {
     }
 
     public EllCurves(int n) {
@@ -244,9 +249,9 @@ public class EllCurves {
             e2 = p.add(ONE).subtract(TWO.multiply(d));
             if (e1.mod(FOUR).equals(ZERO))
                 return new Pair(e1, div(e1, FOUR));
-//                return new Pair(e1, e1.divide(FOUR));
+//                return new EllCurve.Pair(e1, e1.divide(FOUR));
             if (e2.mod(FOUR).equals(ZERO))
-//                return new Pair(e2, e2.divide(FOUR));
+//                return new EllCurve.Pair(e2, e2.divide(FOUR));
                 return new Pair(e2, div(e2, FOUR));
         }
         if (x.equals(p.subtract(ONE))) {
@@ -276,7 +281,7 @@ public class EllCurves {
         EllCurves m = new EllCurves(16);
 
 
-//        Pair res = m.sq2p(p);
+//        EllCurve.Pair res = m.sq2p(p);
 //        System.out.println(res.f0() + " " + res.f1());
     }
 }

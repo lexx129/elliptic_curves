@@ -1,3 +1,5 @@
+package EllCurve;
+
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -74,7 +76,7 @@ public class Main {
                     break;
             }
         }
-//        BigInteger[] t = l.mult(ee.divide(m), new Pair(x0, y0), a, p);
+//        BigInteger[] t = l.mult(ee.divide(m), new EllCurve.Pair(x0, y0), a, p);
         BigInteger[] t = l.mult(l.div(ee, m), new Pair(x0, y0), a, p);
         BigInteger t1 = t[0];
         BigInteger t2 = t[1];
