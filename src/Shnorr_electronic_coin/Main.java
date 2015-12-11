@@ -1,5 +1,7 @@
 package Shnorr_electronic_coin;
 
+import EllCurve.Pair;
+
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -48,14 +50,26 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        String message = "Hello world!";
-
-        Coin coin = new Coin(message, new BigInteger("7"));
+        String message = "Hello_world!";
+        byte[] hash = toSHA1(message.getBytes());
+        System.out.println("Coin generating started...");
+        Coin coin = new Coin(hash, new BigInteger("1234"));
         coin.generateBankOpen();
         System.out.println("***Bank's R` was sent to client***");
         coin.generateClientOpen();
         System.out.println("***Client's m` was sent to bank***");
         coin.makeSign();
         System.out.println("***Bank sent a signature to client***");
+        if (coin.checkSign()) {
+            System.out.println("Подпись банка не принята");
+        } else
+            coin.unMaskSignature();
+
+        BigInteger m = coin.getMessage();
+        Pair R = coin.getR();
+        BigInteger signature = coin.getS();
+
+        System.out.println("Электронная монета: ");
+        System.out.println("(" + m + "; " + R + "; " + signature);
     }
 }
