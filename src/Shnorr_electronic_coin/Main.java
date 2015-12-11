@@ -48,12 +48,14 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        String string = "abacaba";
-//        System.out.println(Arrays.toString(toSHA1(string.getBytes())));
-        String x = "188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012";
-        BigInteger b = new BigInteger(x, 16);
-        System.out.println(b);
+        String message = "Hello world!";
 
-
+        Coin coin = new Coin(message, new BigInteger("7"));
+        coin.generateBankOpen();
+        System.out.println("***Bank's R` was sent to client***");
+        coin.generateClientOpen();
+        System.out.println("***Client's m` was sent to bank***");
+        coin.makeSign();
+        System.out.println("***Bank sent a signature to client***");
     }
 }

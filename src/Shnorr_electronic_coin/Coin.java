@@ -3,6 +3,7 @@ package Shnorr_electronic_coin;
 import EllCurve.Pair;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 
 /**
  * Created by Lexx on 10.12.2015.
@@ -14,6 +15,8 @@ public class Coin {
     private BigInteger THREE = new BigInteger(String.valueOf(3));
     public BigInteger std1 = new BigInteger(String.valueOf(999999999));
     public BigInteger std2 = new BigInteger(String.valueOf(888888888));
+    private SecureRandom rand;
+
     // It's a P192 Elliptic curve's data from NIST specification
 
     private BigInteger p = new BigInteger("6277101735386680763835789423207666416083908700390324961279");
@@ -21,14 +24,56 @@ public class Coin {
     private BigInteger x0 = new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012", 16);
     private BigInteger y0 = new BigInteger("07192b95ffc8da78631011ed6b24cdd573f977a11e794811",16);
     private Pair G0 = new Pair(x0, y0);
-    private BigInteger k; // it's a secret
-    private Pair P;
+    private BigInteger l;   // it's a secret value
+    private BigInteger kBank; // it's a bank's open value
+    private BigInteger alpha; // it's a client's open values
+    private BigInteger beta;
+    private Pair P;         //it's a bank's EllCurve point: P = lQ
+    private BigInteger a;
 
-    public Coin(BigInteger k) {
-        this.k = k;
-        BigInteger a = (((y0.multiply(y0)).subtract(x0.multiply(x0.multiply(x0)))).
+    private Pair bankR;     // it's a bank's EllCurve point for communication
+    private Pair R;         // it's a client's EllCurve point for communication
+    private BigInteger message;
+    private BigInteger anotherM;
+    private BigInteger s;
+    private BigInteger sBank;
+
+    public Coin(String message, BigInteger l) {
+        this.message = new BigInteger(message);
+        this.l = l;
+        a = (((y0.multiply(y0)).subtract(x0.multiply(x0.multiply(x0)))).
                 multiply(x0.modInverse(p))).mod(p);
-        this.P = mult(k, G0, a, p);
+        this.P = mult(l, G0, a, p);
+        this.rand = new SecureRandom();
+    }
+
+    public void generateBankOpen(){
+        kBank = randomNumber(false, p.bitLength()).mod(p);
+        bankR = mult(kBank, G0, a, p);
+        while (openFunction(bankR).equals(ZERO))
+            kBank = randomNumber(false, p.bitLength()).mod(p);
+    }
+
+    public void generateClientOpen(){
+        alpha = randomNumber(false, p.bitLength()).mod(p);
+        R = mult(alpha, bankR, a, p);
+        while (openFunction(R).equals(ZERO))
+            alpha = randomNumber(false, p.bitLength()).mod(p);
+        beta = openFunction(R).multiply(openFunction(bankR).modInverse(p)).mod(p);
+        anotherM = (alpha.modInverse(p).multiply(beta).multiply(message)).mod(p);
+    }
+
+    public void makeSign(){
+        sBank = kBank.add(l.multiply(anotherM).multiply(openFunction(bankR))).mod(p);
+    }
+
+    public void checkSign(){
+        Pair first = mult(sBank, G0, a, p);
+//        Pair second = add()
+    }
+
+    private BigInteger openFunction(Pair a){
+        return a.f0().multiply(a.f1()).mod(p);
     }
 
     public Pair add (Pair A, Pair B, BigInteger a, BigInteger p){
@@ -73,6 +118,18 @@ public class Coin {
             }
         }
         return s;
+    }
+
+    public BigInteger randomNumber(boolean prime, int size) {
+        if (prime)
+            return BigInteger.probablePrime(size, rand);
+        BigInteger number;
+        byte bNumber[] = new byte[(int) Math.ceil(size / 8.0)];
+        do {
+            rand.nextBytes(bNumber);
+            number = new BigInteger(bNumber);
+        } while (number.compareTo(BigInteger.ZERO) <= 0);
+        return number;
     }
 
 }
