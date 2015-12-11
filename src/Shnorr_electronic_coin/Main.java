@@ -53,23 +53,27 @@ public class Main {
         String message = "Hello_world!";
         byte[] hash = toSHA1(message.getBytes());
         System.out.println("Coin generating started...");
-        Coin coin = new Coin(hash, new BigInteger("1234"));
+        Coin coin = new Coin(hash, new BigInteger("10"));
         coin.generateBankOpen();
         System.out.println("***Bank's R` was sent to client***");
         coin.generateClientOpen();
         System.out.println("***Client's m` was sent to bank***");
         coin.makeSign();
         System.out.println("***Bank sent a signature to client***");
-        if (coin.checkSign()) {
-            System.out.println("Подпись банка не принята");
-        } else
+        if (!coin.checkSign()) {
+            System.out.println("Bank's signature is not validated");
+        } else {
             coin.unMaskSignature();
 
-        BigInteger m = coin.getMessage();
-        Pair R = coin.getR();
-        BigInteger signature = coin.getS();
+            BigInteger m = coin.getMessage();
+            Pair R = coin.getR();
+            BigInteger signature = coin.getS();
 
-        System.out.println("Электронная монета: ");
-        System.out.println("(" + m + "; " + R + "; " + signature);
+            System.out.println("Electronic coin: ");
+            System.out.println("(" + m + "; (" + R.f0() + ", " + R.f1() + "); " + signature + ")");
+            if (coin.checkCoin(m, R, signature))
+                System.out.println("Coin is validated by shop");
+            else System.out.println("Coin is not validated by shop");
+        }
     }
 }

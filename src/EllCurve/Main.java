@@ -16,7 +16,7 @@ public class Main {
     private BigInteger mONE = new BigInteger(String.valueOf(-1));
 
     public static void main(String[] args) throws IOException {
-        int n = 16;
+        int n = 12;
         System.out.println("Please wait, while generating...");
         EllCurves l = new EllCurves(n);
         BigInteger p, d, e, m, ee = ZERO;
