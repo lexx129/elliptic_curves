@@ -50,10 +50,13 @@ public class Main {
     }
 
     public static void main(String[] args) {
-        String message = "Hello_world!";
-        byte[] hash = toSHA1(message.getBytes());
+//        String message = "Hello_world!";
+        String message = "1994";
+//        byte[] hash = toSHA1(message.getBytes());
         System.out.println("Coin generating started...");
-        Coin coin = new Coin(hash, new BigInteger("10"));
+        Coin coin = new Coin(message, new BigInteger("17"));
+        coin.test();
+        System.exit(0);
         coin.generateBankOpen();
         System.out.println("***Bank's R` was sent to client***");
         coin.generateClientOpen();

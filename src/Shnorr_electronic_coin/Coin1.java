@@ -10,7 +10,7 @@ import java.security.SecureRandom;
 /**
  * Created by Lexx on 10.12.2015.
  */
-public class Coin {
+public class Coin1 {
     private BigInteger mONE = new BigInteger(String.valueOf(-1));
     public BigInteger ZERO = BigInteger.ZERO;
     public BigInteger ONE = BigInteger.ONE;
@@ -44,35 +44,37 @@ public class Coin {
     private BigInteger s;
     private BigInteger sBank;
 
-    public Coin() {
+    public Coin1() {
     }
 
-    public Coin(String message, BigInteger l) {
+    public Coin1(String message, BigInteger l) {
         this.message = new BigInteger(message);
         this.l = l;
-        a = (((y0.multiply(y0)).subtract(x0.multiply(x0.multiply(x0)))).
-                multiply(x0.modInverse(p))).mod(p);
-//        a = new BigInteger("1");
+//        a = (((y0.multiply(y0)).subtract(x0.multiply(x0.multiply(x0)))).
+//                multiply(gcdExtended(x0, p)[1])).mod(p);
+        a = new BigInteger("1");
         System.out.println("a = " + a);
-        this.P = mult(l, G0, a, p);
-        printPoint(mult2(G0, l), "**testing for P ");
-//        this.P = mult2(G0, l);
+//        printPoint(mult2(G0, l), "**testing for P ");
+        this.P = mult2(G0, l);
         System.out.println("P = (" + P.f0() + ", " + P.f1() + ")");
         this.rand = new SecureRandom();
     }
 
     public void generateBankOpen() {
         System.out.println("Generating bank open key...");
-        kBank = randomNumber(false, p.bitLength()).mod(p);
-//        kBank = new BigInteger("11");
+//        kBank = randomNumber(false, p.bitLength()).mod(p);
+        kBank = new BigInteger("6");
         System.out.println("k` = " + kBank);
-        bankR = mult(kBank, G0, a, p);
 
-        printPoint(mult2(G0, kBank), "***test mult for bankR");
+//        printPoint(mult2(G0, kBank), "***test mult for bankR");
 
-//        bankR = mult2(G0, kBank);
-        while (openFunction(bankR).equals(ZERO))
+        bankR = mult2(G0, kBank);
+        printPoint(bankR, "R = ");
+        while (openFunction(bankR).equals(ZERO)) {
+            printPoint(bankR, "generated R = ");
             kBank = randomNumber(false, p.bitLength()).mod(p);
+            bankR = mult2(G0, kBank);
+        }
         printPoint(bankR, "R` = ");
 //        System.out.println("R` = (" + bankR.f0() + ", " + bankR.f1() + ")");
     }
@@ -82,17 +84,18 @@ public class Coin {
         alpha = randomNumber(false, p.bitLength()).mod(p);
 //        alpha = new BigInteger("8");
         System.out.println("generated alpha = " + alpha);
-        R = mult(alpha, bankR, a, p);
 
-        printPoint(mult2(bankR, alpha), "**test mult for R ");
+//        printPoint(mult2(bankR, alpha), "**test mult for R ");
 
-//        R = mult2(bankR, alpha);
-        while (openFunction(R).equals(ZERO))
+        R = mult2(bankR, alpha);
+        while (openFunction(R).equals(ZERO)) {
             alpha = randomNumber(false, p.bitLength()).mod(p);
+            R = mult2(bankR, alpha);
+        }
         System.out.println("R = (" + R.f0() + ", " + R.f1() + ")");
-        beta = openFunction(R).multiply(openFunction(bankR).modInverse(p)).mod(p);
+        beta = openFunction(R).multiply(gcdExtended(openFunction(bankR), p)[1]).mod(p);
         System.out.println("generated beta = " + beta);
-        anotherM = (alpha.modInverse(p).multiply(beta).multiply(message)).mod(p);
+        anotherM = (gcdExtended(alpha, p)[1].multiply(beta).multiply(message)).mod(p);
         System.out.println("M` = " + anotherM);
     }
 
@@ -102,26 +105,15 @@ public class Coin {
     }
 
     public boolean checkSign() {
-        Pair first = mult(sBank, G0, a, p);
 
-        Pair a_first = mult2(G0, sBank);
-        printPoint(a_first, "**testing for first ");
-
-//        Pair first = mult2(G0, sBank);
-        Pair second = mult(anotherM.multiply(openFunction(bankR)), P, a, p);
-
-        Pair a_second = mult2(P, anotherM.multiply(openFunction(bankR)));
-        printPoint(a_second, "**testing for second ");
-//        Pair second = mult2(P, anotherM.multiply(openFunction(bankR)));
+        Pair first = mult2(G0, sBank);
+        Pair second = mult2(P, anotherM.multiply(openFunction(bankR)));
         Pair third = add(bankR, second, a, p);
-        Pair a_third = add(bankR, a_second, a, p);
-        printPoint(a_third, "**test for third");
         printPoint(first, "first = ");
         printPoint(third, "third = ");
 //        System.out.println("first = (" + first + "; third = " + third);
         System.out.println(first.equals(third));
 
-        System.out.println(a_first.equals(a_third));
         return first.equals(third);
     }
 
@@ -146,18 +138,16 @@ public class Coin {
             return false;
         if (openFunction(R).equals(ZERO))
             return false;
-//        Pair part1 = mult2(G0, s);
-        Pair part1 = mult(s, G0, a, p);
+        Pair part1 = mult2(G0, s);
         Pair part2 = mult2(P, m.multiply(openFunction(R)));
-//        Pair part2 = mult(m.multiply(openFunction(R)), P, a, p);
         Pair part3 = add(R, part2, a, p);
-//        System.out.println("part 1: " + part1.f0() + ", " + part1.f1());
-//        System.out.println("part 3: " + part3.f0() + ", " + part3.f1());
+        System.out.println("part 1: " + part1.f0() + ", " + part1.f1());
+        System.out.println("part 3: " + part3.f0() + ", " + part3.f1());
         return part1.equals(part3);
     }
 
     public void test(){
-        Pair x = new Pair(new BigInteger("15"), new BigInteger("20"));
+        Pair x = new Pair(new BigInteger("27"), new BigInteger("18"));
         BigInteger k = new BigInteger("2");
 //        BigInteger k = randomNumber(false, p.bitLength()).mod(p);
         System.out.println("k = " + k);
@@ -167,12 +157,48 @@ public class Coin {
     }
 
     private BigInteger openFunction(Pair a) {
-        return a.f0().multiply(a.f1()).mod(p);
+        if (a.equals(new Pair(std1, std2)))
+            return ZERO;
+        return a.f0().add(a.f1()).mod(p);
     }
 
     private void printPoint(Pair a, String message){
         System.out.println(message + "(" + a.f0() + ", " + a.f1() + ")");
     }
+
+//    public Pair add (Pair A, Pair B, BigInteger a, BigInteger p){
+//        BigInteger x1 = A.f0();
+//        BigInteger y1 = A.f1();
+//        BigInteger x2 = B.f0();
+//        BigInteger y2 = B.f1();
+//        BigInteger x3,y3;
+//        BigInteger lam;
+//        if (A.equals(new Pair(std1, std2))){
+//            return B;
+//        }
+//        if (B.equals(new Pair(std1, std2)))
+//            return A;
+//        if (A.equals(B)){
+//            if (y1.equals(ZERO))
+//                return new Pair(std1, std2);
+//            lam = (x1.multiply(x1.multiply(THREE)).add(a))
+//                    .multiply((y1.multiply(TWO)).modInverse(p)).mod(p);
+////            lam = ((x1.multiply(x1).multiply(THREE).add(a))
+////                    .multiply(y1.multiply(TWO).modInverse(p))).mod(p);
+//            x3 = (lam.multiply(lam).subtract(x1.multiply(TWO))).mod(p);
+//            y3 = (lam.multiply(x1.subtract(x3)).subtract(y1)).mod(p);
+//            return new Pair(x3, y3);
+//        } else {
+//            if (x1.equals(x2))
+//                return new Pair(std1, std2);
+//            lam = (y2.subtract(y1).multiply((x2.subtract(x1)).modInverse(p))).mod(p);
+////            lam = ((y2.subtract(y1)).
+////                    multiply(x2.subtract(x1)).modInverse(p)).mod(p);
+//            x3 = (lam.multiply(lam).subtract(x2).subtract(x1)).mod(p);
+//            y3 = (lam.multiply(x1.subtract(x3)).subtract(y1)).mod(p);
+//            return new Pair(x3, y3);
+//        }
+//    }
 
     public Pair add (Pair A, Pair B, BigInteger a, BigInteger p){
         BigInteger x1 = A.f0();
@@ -189,19 +215,16 @@ public class Coin {
         if (A.equals(B)){
             if (y1.equals(ZERO))
                 return new Pair(std1, std2);
-            lam = (x1.multiply(x1.multiply(THREE)).add(a))
-                    .multiply((y1.multiply(TWO)).modInverse(p)).mod(p);
-//            lam = ((x1.multiply(x1).multiply(THREE).add(a))
-//                    .multiply(y1.multiply(TWO).modInverse(p))).mod(p);
+            lam = (x1.multiply(x1).multiply(THREE).add(a)).
+                    multiply(gcdExtended(y1.multiply(TWO), p)[1]).mod(p);
             x3 = (lam.multiply(lam).subtract(x1.multiply(TWO))).mod(p);
             y3 = (lam.multiply(x1.subtract(x3)).subtract(y1)).mod(p);
             return new Pair(x3, y3);
         } else {
             if (x1.equals(x2))
                 return new Pair(std1, std2);
-            lam = (y2.subtract(y1).multiply((x2.subtract(x1)).modInverse(p))).mod(p);
-//            lam = ((y2.subtract(y1)).
-//                    multiply(x2.subtract(x1)).modInverse(p)).mod(p);
+            lam = ((y2.subtract(y1)).
+                    multiply(gcdExtended(x2.subtract(x1), p)[1])).mod(p);
             x3 = (lam.multiply(lam).subtract(x2).subtract(x1)).mod(p);
             y3 = (lam.multiply(x1.subtract(x3)).subtract(y1)).mod(p);
             return new Pair(x3, y3);
@@ -232,8 +255,8 @@ public class Coin {
                 res = add(res, x, a, p);
 //                n = n.subtract(ONE);
 //            } else {
-                x = add(x, x, a, p);
-                n = n.divide(TWO);
+            x = add(x, x, a, p);
+            n = n.divide(TWO);
 //            }
         }
         return res;
@@ -285,6 +308,31 @@ public class Coin {
             y = y2;
         }
         return new BigInteger[]{d, x, y};
+    }
+
+    private BigInteger mods(BigInteger a, BigInteger n) {
+        if (n.compareTo(ZERO) <= 0) {
+            System.err.println("Отрицательный модуль");
+            System.exit(-1);
+        }
+        a = a.mod(n);
+        if (a.multiply(TWO).compareTo(n) == 1)
+            a = a.subtract(n);
+        return a;
+    }
+
+    private BigInteger powMods(BigInteger a, BigInteger r, BigInteger n) {
+        BigInteger res = ONE;
+        while (r.compareTo(ZERO) == 1) {
+            if (r.mod(TWO).compareTo(ONE) == 0) {
+                r = r.subtract(ONE);
+                res = mods(res.multiply(a), n);
+            }
+//            r = r.divide(TWO);
+            r = div(r, TWO);
+            a = mods(a.multiply(a), n);
+        }
+        return res;
     }
 
     public BigInteger div(BigInteger a, BigInteger b){
