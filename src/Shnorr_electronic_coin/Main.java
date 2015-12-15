@@ -50,13 +50,13 @@ public class Main {
     }
 
     public static void main(String[] args) {
-//        String message = "Hello_world!";
-        String message = "1994";
-//        byte[] hash = toSHA1(message.getBytes());
+        String message = "Hello_world!";
+//        String message = "1994";
+        byte[] hash = toSHA1(message.getBytes());
         System.out.println("Coin generating started...");
-        Coin coin = new Coin(message, new BigInteger("17"));
-        coin.test();
-        System.exit(0);
+        Coin1 coin = new Coin1(hash, new BigInteger("17"));
+//        coin.test();
+//        System.exit(0);
         coin.generateBankOpen();
         System.out.println("***Bank's R` was sent to client***");
         coin.generateClientOpen();
@@ -66,6 +66,7 @@ public class Main {
         if (!coin.checkSign()) {
             System.out.println("Bank's signature is not validated");
         } else {
+            System.out.println("Bank's signature is validated, unmasking message..");
             coin.unMaskSignature();
 
             BigInteger m = coin.getMessage();
